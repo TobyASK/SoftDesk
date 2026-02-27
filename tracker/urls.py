@@ -2,7 +2,7 @@
 URL routing for tracker app with nested routes.
 """
 
-from django.urls import path, include
+from django.urls import re_path, include
 from rest_framework.routers import SimpleRouter, DefaultRouter
 from .views import ProjectViewSet, IssueViewSet, CommentViewSet
 
@@ -26,8 +26,18 @@ issues_router.register(
     basename='comment'
 )
 
+# Custom view for comment creation
+comment_viewset = CommentViewSet.as_view({
+    'post': 'create',
+    'get': 'list',
+})
+
 urlpatterns = [
-    path('', include(router.urls)),
-    path('projects/<uuid:project_pk>/', include(projects_router.urls)),
-    path('projects/<uuid:project_pk>/issues/<uuid:issue_pk>/', include(issues_router.urls)),
+    # Custom route for comment creation (must come before the router routes)
+    re_path(r'^projects/(?P<project_pk>[0-9a-f-]+)/issues/(?P<issue_pk>[0-9a-f-]+)/comments/$',
+            comment_viewset, name='comment-list-create'),
+    
+    re_path('', include(router.urls)),
+    re_path(r'^projects/(?P<project_pk>[0-9a-f-]+)/', include(projects_router.urls)),
+    re_path(r'^projects/(?P<project_pk>[0-9a-f-]+)/issues/(?P<issue_pk>[0-9a-f-]+)/', include(issues_router.urls)),
 ]

@@ -100,7 +100,7 @@ class TestJWTAuthentication:
 
     def test_access_protected_endpoint_without_auth(self, api_client):
         """Test accessing protected endpoint without authentication fails."""
-        response = api_client.get('/api/v1/auth/users/profile/me/')
+        response = api_client.get('/api/v1/auth/users/profile/')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_access_protected_endpoint_with_token(self, api_client, authenticated_user):
@@ -112,7 +112,7 @@ class TestJWTAuthentication:
         token = response.data['access']
 
         api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
-        response = api_client.get('/api/v1/auth/users/profile/me/')
+        response = api_client.get('/api/v1/auth/users/profile/')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['username'] == authenticated_user.username
 
@@ -123,7 +123,7 @@ class TestUserProfile:
 
     def test_view_own_profile(self, authenticated_client, authenticated_user):
         """Test viewing own profile."""
-        response = authenticated_client.get('/api/v1/auth/users/profile/me/')
+        response = authenticated_client.get('/api/v1/auth/users/profile/')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['username'] == authenticated_user.username
         assert response.data['age'] == authenticated_user.age

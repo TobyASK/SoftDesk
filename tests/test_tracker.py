@@ -86,7 +86,11 @@ class TestProjectManagement:
             role='author'
         )
 
-        data = {'name': 'Updated Name', 'type': 'front-end'}
+        data = {
+            'name': 'Updated Name',
+            'description': 'Updated description',
+            'type': 'front-end'
+        }
         response = authenticated_client.put(
             f'/api/v1/projects/{project.id}/',
             data
@@ -298,14 +302,13 @@ class TestIssueManagement:
             age=25,
             password='pass123'
         )
-
         data = {'assignee_id': non_contributor.id}
         response = authenticated_client.patch(
             f'/api/v1/projects/{project_with_contributors.id}/issues/{issue.id}/',
             data
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'assignee' in response.data
+        assert 'assignee_id' in response.data
 
     def test_update_issue_as_author(
         self,

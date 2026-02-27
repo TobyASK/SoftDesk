@@ -161,11 +161,8 @@ class IssueDetailSerializer(serializers.ModelSerializer):
     Validation critique : L'assignÃ© doit Ãªtre contributeur du projet.
     """
     author = UserBasicSerializer(read_only=True, allow_null=True)
-    assignee = UserBasicSerializer(read_only=True, allow_null=True)
-    # Champ write_only pour assigner un utilisateur
     assignee_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
-        write_only=True,
         required=False,
         allow_null=True,
         source='assignee'
@@ -183,7 +180,6 @@ class IssueDetailSerializer(serializers.ModelSerializer):
             'tag',
             'status',
             'author',
-            'assignee',
             'assignee_id',
             'comments',
             'created_time',
@@ -226,7 +222,5 @@ class IssueDetailSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def validate(self, attrs):
-        """Validation finale avant sauvegarde (appelle model.clean())."""
-        instance = self.instance or Issue(**attrs)
-        instance.full_clean()
+        """Validation des données saisies."""
         return attrs

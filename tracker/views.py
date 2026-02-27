@@ -85,8 +85,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        """CrÃ©er le projet avec l'utilisateur actuel comme auteur."""
-        serializer.save(author=self.request.user)
+        """Créer le projet avec l'utilisateur actuel comme auteur."""
+        project = serializer.save(author=self.request.user)
+        # Ajouter automatiquement le créateur comme contributeur avec rôle author
+        Contributor.objects.create(
+            project=project,
+            user=self.request.user,
+            role='author'
+        )
 
     @action(
         detail=True,
@@ -258,18 +264,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     ViewSet pour la gestion des commentaires sur une issue.
 
     Endpoints :
-    - GET /api/v1/projects/{project_id}/issues/{issue_id}/comments/ : Liste des commentaires (paginÃ©)
-    - POST /api/v1/projects/{project_id}/issues/{issue_id}/comments/ : CrÃ©er un commentaire
-    - GET /api/v1/projects/{project_id}/issues/{issue_id}/comments/{uuid}/ : DÃ©tails du commentaire
+    - GET /api/v1/projects/{project_id}/issues/{issue_id}/comments/ : Liste des commentaires (paginé)
+    - POST /api/v1/projects/{project_id}/issues/{issue_id}/comments/ : Créer un commentaire
+    - GET /api/v1/projects/{project_id}/issues/{issue_id}/comments/{uuid}/ : Détails du commentaire
     - PUT /api/v1/projects/{project_id}/issues/{issue_id}/comments/{uuid}/ : Modifier (auteur uniquement)
     - DELETE /api/v1/projects/{project_id}/issues/{issue_id}/comments/{uuid}/ : Supprimer (auteur uniquement)
 
-    SÃ©curitÃ© :
+    Sécurité :
     - Seuls les contributeurs du projet peuvent voir les commentaires
     - Seul l'auteur peut modifier/supprimer son commentaire
     """
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated, IsProjectContributor, IsIssueOrCommentAuthor]
+    permission_classes = [IsAuthenticated, IsContributorOrReadOnly]
     basename = 'comment'
     lookup_field = 'uuid'
 
