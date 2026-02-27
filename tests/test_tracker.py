@@ -3,8 +3,11 @@ Tests for tracker app - Project, Issue, Comment management and permissions.
 """
 
 import pytest
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from tracker.models import Project, Contributor, Issue, Comment
+
+User = get_user_model()
 
 
 @pytest.mark.django_db
@@ -487,11 +490,6 @@ class TestUnauthenticatedAccess:
         }
         response = api_client.post('/api/v1/projects/', data)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-# Import needed for test_cannot_assign_issue_to_non_contributor
-from django.contrib.auth import get_user_model
-User = get_user_model()
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Views for accounts app - User registration and profile management.
 """
 
@@ -20,7 +20,7 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     """
     ViewSet for User registration, profile viewing, and updates.
-    
+
     Endpoints:
     - POST /api/v1/auth/register/ : Register new user
     - GET /api/v1/auth/users/ : List all users (paginated)

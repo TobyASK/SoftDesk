@@ -1,11 +1,11 @@
-"""
-Permissions pour l'application tracker - Contrôle d'accès aux projets, issues et commentaires.
+﻿"""
+Permissions pour l'application tracker - ContrÃ´le d'accÃ¨s aux projets, issues et commentaires.
 
-Règles de sécurité implémentées :
-1. IsProjectContributor : Seuls les contributeurs peuvent accéder au projet
+RÃ¨gles de sÃ©curitÃ© implÃ©mentÃ©es :
+1. IsProjectContributor : Seuls les contributeurs peuvent accÃ©der au projet
 2. IsProjectAuthor : Seul l'auteur du projet peut le modifier/supprimer
 3. IsIssueOrCommentAuthor : Seul l'auteur peut modifier/supprimer issue ou comment
-4. IsContributorOrReadOnly : Contributeurs en lecture, auteur en écriture
+4. IsContributorOrReadOnly : Contributeurs en lecture, auteur en Ã©criture
 """
 
 from rest_framework.permissions import BasePermission
@@ -14,22 +14,22 @@ from .models import Contributor
 
 class IsProjectContributor(BasePermission):
     """
-    Permission : accès au projet uniquement si utilisateur est contributeur.
-    
-    Utilisée pour filtrer l'accès aux projets, issues et commentaires.
+    Permission : accÃ¨s au projet uniquement si utilisateur est contributeur.
+
+    UtilisÃ©e pour filtrer l'accÃ¨s aux projets, issues et commentaires.
     Bloque toute action (GET, POST, PUT, DELETE) si non-contributeur.
     """
-    message = "Vous devez être contributeur du projet pour y accéder."
+    message = "Vous devez Ãªtre contributeur du projet pour y accÃ©der."
 
     def has_object_permission(self, request, view, obj):
         """
-        Vérifie si l'utilisateur est contributeur du projet.
-        
-        obj peut être :
-        - Project : vérifie directement
-        - Issue ou Comment : récupère le projet via obj.project
+        VÃ©rifie si l'utilisateur est contributeur du projet.
+
+        obj peut Ãªtre :
+        - Project : vÃ©rifie directement
+        - Issue ou Comment : rÃ©cupÃ¨re le projet via obj.project
         """
-        # obj peut être Project, Issue, ou Comment
+        # obj peut Ãªtre Project, Issue, ou Comment
         if hasattr(obj, 'project'):
             # C'est un Issue ou Comment
             project = obj.project
@@ -46,7 +46,7 @@ class IsProjectContributor(BasePermission):
 class IsProjectAuthor(BasePermission):
     """
     Permission : gestion du projet uniquement si utilisateur est l'auteur.
-    
+
     L'auteur du projet a tous les droits (modification, suppression, ajout de contributeurs).
     Les autres contributeurs peuvent seulement consulter.
     """
@@ -54,7 +54,7 @@ class IsProjectAuthor(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         """
-        Vérifie si l'utilisateur est l'auteur du projet.
+        VÃ©rifie si l'utilisateur est l'auteur du projet.
         """
         if hasattr(obj, 'project'):
             # C'est un Issue ou Comment
@@ -69,15 +69,15 @@ class IsProjectAuthor(BasePermission):
 class IsIssueOrCommentAuthor(BasePermission):
     """
     Permission : modification d'issue/comment uniquement par l'auteur.
-    
-    Règle : Seul l'auteur d'une issue ou d'un commentaire peut le modifier/supprimer.
+
+    RÃ¨gle : Seul l'auteur d'une issue ou d'un commentaire peut le modifier/supprimer.
     Les autres contributeurs peuvent seulement consulter.
     """
     message = "Seul l'auteur peut modifier ou supprimer cette ressource."
 
     def has_object_permission(self, request, view, obj):
         """
-        Vérifie si l'utilisateur est l'auteur de l'issue ou du commentaire.
+        VÃ©rifie si l'utilisateur est l'auteur de l'issue ou du commentaire.
         """
         return obj.author == request.user
 
@@ -85,19 +85,19 @@ class IsIssueOrCommentAuthor(BasePermission):
 class IsContributorOrReadOnly(BasePermission):
     """
     Permission : consultation si contributeur, modification si auteur.
-    
-    Règles :
+
+    RÃ¨gles :
     - GET/HEAD/OPTIONS : N'importe quel contributeur peut consulter
     - POST/PUT/PATCH/DELETE : Seul l'auteur peut modifier/supprimer
     """
-    message = "Vous devez être contributeur du projet."
+    message = "Vous devez Ãªtre contributeur du projet."
 
     def has_object_permission(self, request, view, obj):
         """
-        Vérifie si l'utilisateur est contributeur (lecture) ou auteur (écriture).
+        VÃ©rifie si l'utilisateur est contributeur (lecture) ou auteur (Ã©criture).
         """
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
-            # Lecture : vérifier si contributeur
+            # Lecture : vÃ©rifier si contributeur
             if hasattr(obj, 'project'):
                 project = obj.project
             else:
@@ -108,7 +108,7 @@ class IsContributorOrReadOnly(BasePermission):
                 project=project
             ).exists()
 
-        # Écriture : doit être l'auteur
+        # Ã‰criture : doit Ãªtre l'auteur
         if hasattr(obj, 'author'):
             return obj.author == request.user
         return False

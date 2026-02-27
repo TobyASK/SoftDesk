@@ -1,15 +1,14 @@
-"""
-Sérialiseurs pour l'application accounts (gestion des utilisateurs).
+﻿"""
+SÃ©rialiseurs pour l'application accounts (gestion des utilisateurs).
 
 Contient :
-- UserRegistrationSerializer : Inscription avec validation d'âge >= 15
+- UserRegistrationSerializer : Inscription avec validation d'Ã¢ge >= 15
 - UserDetailSerializer : Affichage du profil utilisateur
 - UserUpdateSerializer : Modification du profil
 """
 
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
@@ -17,15 +16,15 @@ User = get_user_model()
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
-    Sérialiseur pour l'inscription d'un utilisateur.
-    
+    SÃ©rialiseur pour l'inscription d'un utilisateur.
+
     Validations :
-    - Âge >= 15 ans (RGPD)
-    - Mot de passe >= 8 caractères
+    - Ã‚ge >= 15 ans (RGPD)
+    - Mot de passe >= 8 caractÃ¨res
     - Confirmation du mot de passe
     - Nom d'utilisateur unique
     """
-    # Mot de passe (non visible dans les réponses API)
+    # Mot de passe (non visible dans les rÃ©ponses API)
     password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -36,7 +35,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         write_only=True,
         style={'input_type': 'password'}
     )
-    # Âge avec validation minimum 15 ans
+    # Ã‚ge avec validation minimum 15 ans
     age = serializers.IntegerField(min_value=15, max_value=150)
     # Consentements RGPD
     can_be_contacted = serializers.BooleanField(default=False)
@@ -66,7 +65,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate_age(self, value):
         """
-        Validation de l'âge minimum (15 ans) - Conformité RGPD.
+        Validation de l'Ã¢ge minimum (15 ans) - ConformitÃ© RGPD.
         Cette validation est critique pour l'inscription.
         """
         if value < 15:
@@ -77,8 +76,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """
-        Validation globale : vérification que les mots de passe correspondent
-        et que le nom d'utilisateur n'est pas déjà pris.
+        Validation globale : vÃ©rification que les mots de passe correspondent
+        et que le nom d'utilisateur n'est pas dÃ©jÃ  pris.
         """
         if attrs.get('password') != attrs.get('password_confirm'):
             raise serializers.ValidationError({
@@ -87,15 +86,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         if User.objects.filter(username=attrs.get('username')).exists():
             raise serializers.ValidationError({
-                'username': 'Ce nom d\'utilisateur est déjà utilisé.'
+                'username': 'Ce nom d\'utilisateur est dÃ©jÃ  utilisÃ©.'
             })
 
         return attrs
 
     def create(self, validated_data):
         """
-        Création de l'utilisateur avec hachage du mot de passe.
-        Le mot de passe est haché avec set_password() pour la sécurité.
+        CrÃ©ation de l'utilisateur avec hachage du mot de passe.
+        Le mot de passe est hachÃ© avec set_password() pour la sÃ©curitÃ©.
         """
         validated_data.pop('password_confirm', None)
         password = validated_data.pop('password')

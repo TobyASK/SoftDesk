@@ -1,41 +1,40 @@
-"""
-Modèle utilisateur personnalisé avec conformité RGPD.
+﻿"""
+ModÃ¨le utilisateur personnalisÃ© avec conformitÃ© RGPD.
 
-CustomUser étend AbstractUser pour ajouter :
-- Validation d'âge >= 15 ans (obligation RGPD)
+CustomUser Ã©tend AbstractUser pour ajouter :
+- Validation d'Ã¢ge >= 15 ans (obligation RGPD)
 - Champs de consentement (can_be_contacted, can_data_be_shared)
 """
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from datetime import date
 
 
 class CustomUser(AbstractUser):
     """
-    Utilisateur personnalisé avec conformité RGPD.
-    
+    Utilisateur personnalisÃ© avec conformitÃ© RGPD.
+
     Champs obligatoires :
-    - age : Âge de l'utilisateur (doit être >= 15 ans pour s'inscrire)
-    - can_be_contacted : Consentement RGPD pour être contacté
-    - can_data_be_shared : Consentement RGPD pour partage des données
+    - age : Ã‚ge de l'utilisateur (doit Ãªtre >= 15 ans pour s'inscrire)
+    - can_be_contacted : Consentement RGPD pour Ãªtre contactÃ©
+    - can_data_be_shared : Consentement RGPD pour partage des donnÃ©es
     """
-    # Âge de l'utilisateur - validation >= 15 ans requise (RGPD)
+    # Ã‚ge de l'utilisateur - validation >= 15 ans requise (RGPD)
     age = models.IntegerField(
         null=True,
         blank=True,
-        help_text="Âge de l'utilisateur. Doit être >= 15 pour s'inscrire."
+        help_text="Ã‚ge de l'utilisateur. Doit Ãªtre >= 15 pour s'inscrire."
     )
-    # Consentement RGPD : l'utilisateur accepte d'être contacté
+    # Consentement RGPD : l'utilisateur accepte d'Ãªtre contactÃ©
     can_be_contacted = models.BooleanField(
         default=False,
-        help_text="RGPD : Consentement pour être contacté"
+        help_text="RGPD : Consentement pour Ãªtre contactÃ©"
     )
-    # Consentement RGPD : l'utilisateur accepte le partage de ses données
+    # Consentement RGPD : l'utilisateur accepte le partage de ses donnÃ©es
     can_data_be_shared = models.BooleanField(
         default=False,
-        help_text="RGPD : Consentement pour partager les données"
+        help_text="RGPD : Consentement pour partager les donnÃ©es"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -50,9 +49,9 @@ class CustomUser(AbstractUser):
 
     def clean(self):
         """
-        Validation de l'âge >= 15 ans (conformité RGPD).
-        Cette méthode est appelée avant la sauvegarde pour vérifier
-        que l'utilisateur a l'âge minimum légal.
+        Validation de l'Ã¢ge >= 15 ans (conformitÃ© RGPD).
+        Cette mÃ©thode est appelÃ©e avant la sauvegarde pour vÃ©rifier
+        que l'utilisateur a l'Ã¢ge minimum lÃ©gal.
         """
         super().clean()
         if self.age < 15:
