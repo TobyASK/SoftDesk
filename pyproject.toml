@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "softdesk"
+version = "1.0.0"
+description = "SoftDesk - Issue tracking API with Django REST Framework"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "softdesk"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Django = "^4.2"
+djangorestframework = "^3.14"
+djangorestframework-simplejwt = "^5.2"
+python-decouple = "^3.8"
+pytest = "^7.4"
+pytest-django = "^4.5"
+pytest-cov = "^4.1"
+
+[tool.poetry.group.dev.dependencies]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "softdesk.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "--cov=. --cov-report=html --cov-report=term"

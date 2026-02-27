@@ -1,0 +1,550 @@
+{
+  "info": {
+    "_postman_id": "softdesk-api-collection",
+    "name": "SoftDesk API",
+    "description": "SoftDesk Issue Tracking API - Complete API Documentation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"john_doe\",\n  \"email\": \"john@example.com\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"age\": 25,\n  \"password\": \"securepass123\",\n  \"password_confirm\": \"securepass123\",\n  \"can_be_contacted\": true,\n  \"can_data_be_shared\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register/",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register", ""]
+            }
+          }
+        },
+        {
+          "name": "Obtain Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"john_doe\",\n  \"password\": \"securepass123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/token/",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "token", ""]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/token/refresh/",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "token", "refresh", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/users/profile/me/",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "users", "profile", "me", ""]
+            }
+          }
+        },
+        {
+          "name": "List All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/users/?page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "users", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/?page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["projects", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Web App\",\n  \"description\": \"A responsive web application\",\n  \"type\": \"front-end\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Project Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Project Name\",\n  \"description\": \"Updated description\",\n  \"type\": \"back-end\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Add Contributor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/contributor/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "contributor", ""]
+            }
+          }
+        },
+        {
+          "name": "Remove Contributor",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/contributor/?user_id=2",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "contributor", ""],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Issues",
+      "item": [
+        {
+          "name": "List Issues",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/?page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Fix responsive design\",\n  \"description\": \"The layout breaks on small screens\",\n  \"priority\": \"HIGH\",\n  \"tag\": \"BUG\",\n  \"status\": \"To Do\",\n  \"assignee_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Issue Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Issue",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"In Progress\",\n  \"priority\": \"MEDIUM\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Delete Issue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "List Comments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/comments/?page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", "comments", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"I can fix this by adjusting the CSS media queries\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/comments/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", "comments", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Comment",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/comments/{{comment_uuid}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", "comments", "{{comment_uuid}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated comment text\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/comments/{{comment_uuid}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", "comments", "{{comment_uuid}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/comments/{{comment_uuid}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", "comments", "{{comment_uuid}}", ""]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api/v1",
+      "type": "default"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "project_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "issue_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "comment_uuid",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}
