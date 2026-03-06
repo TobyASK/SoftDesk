@@ -1,11 +1,11 @@
 ﻿"""
-Permissions pour l'application tracker - ContrÃ´le d'accÃ¨s aux projets, issues et commentaires.
+Permissions pour l'application tracker - Contrôle d'accès aux projets, issues et commentaires.
 
-RÃ¨gles de sÃ©curitÃ© implÃ©mentÃ©es :
-1. IsProjectContributor : Seuls les contributeurs peuvent accÃ©der au projet
+Règles de sécurité implémentées :
+1. IsProjectContributor : Seuls les contributeurs peuvent accéder au projet
 2. IsProjectAuthor : Seul l'auteur du projet peut le modifier/supprimer
 3. IsIssueOrCommentAuthor : Seul l'auteur peut modifier/supprimer issue ou comment
-4. IsContributorOrReadOnly : Contributeurs en lecture, auteur en Ã©criture
+4. IsContributorOrReadOnly : Contributeurs en lecture, auteur en écriture
 """
 
 from rest_framework.permissions import BasePermission
@@ -14,12 +14,12 @@ from .models import Contributor
 
 class IsProjectContributor(BasePermission):
     """
-    Permission : accÃ¨s au projet uniquement si utilisateur est contributeur.
+    Permission : accès au projet uniquement si utilisateur est contributeur.
 
-    UtilisÃ©e pour filtrer l'accÃ¨s aux projets, issues et commentaires.
+    Utilisée pour filtrer l'accès aux projets, issues et commentaires.
     Bloque toute action (GET, POST, PUT, DELETE) si non-contributeur.
     """
-    message = "Vous devez Ãªtre contributeur du projet pour y accÃ©der."
+    message = "Vous devez être contributeur du projet pour y accéder."
 
     def has_object_permission(self, request, view, obj):
         """
@@ -78,14 +78,14 @@ class IsIssueOrCommentAuthor(BasePermission):
     """
     Permission : modification d'issue/comment uniquement par l'auteur.
 
-    RÃ¨gle : Seul l'auteur d'une issue ou d'un commentaire peut le modifier/supprimer.
+    Règle : Seul l'auteur d'une issue ou d'un commentaire peut le modifier/supprimer.
     Les autres contributeurs peuvent seulement consulter.
     """
     message = "Seul l'auteur peut modifier ou supprimer cette ressource."
 
     def has_object_permission(self, request, view, obj):
         """
-        VÃ©rifie si l'utilisateur est l'auteur de l'issue ou du commentaire.
+        Vérifie si l'utilisateur est l'auteur de l'issue ou du commentaire.
         """
         return obj.author == request.user
 

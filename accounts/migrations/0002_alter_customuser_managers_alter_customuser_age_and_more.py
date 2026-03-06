@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='customuser',
             name='age',
-            field=models.IntegerField(blank=True, help_text="Âge de l'utilisateur. Doit être >= 15 pour s'inscrire.", null=True),
+            field=models.IntegerField(blank=True, help_text="ge de l'utilisateur. Doit être >= 15 pour s'inscrire.", null=True),
         ),
         migrations.AlterField(
             model_name='customuser',

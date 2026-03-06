@@ -3,13 +3,13 @@ Vues pour l'application tracker - Gestion des projets, issues et commentaires.
 
 Contient :
 - ProjectViewSet : CRUD sur les projets + gestion des contributeurs
-- IssueViewSet : CRUD sur les problÃ¨mes (issues) d'un projet
+- IssueViewSet : CRUD sur les problèmes (issues) d'un projet
 - CommentViewSet : CRUD sur les commentaires d'une issue
 
-SÃ©curitÃ© :
-- Tous les endpoints nÃ©cessitent une authentification JWT
-- Les querysets sont filtrÃ©s pour ne montrer que les ressources accessibles
-- Les permissions sont vÃ©rifiÃ©es Ã  chaque requÃªte
+Sécurité :
+- Tous les endpoints nécessitent une authentification JWT
+- Les querysets sont filtrés pour ne montrer que les ressources accessibles
+- Les permissions sont vérifiées Ã  chaque requête
 """
 
 from rest_framework import viewsets, status
@@ -39,15 +39,15 @@ class ProjectViewSet(viewsets.ModelViewSet):
     ViewSet pour la gestion des projets.
 
     Endpoints :
-    - GET /api/v1/projects/ : Liste des projets de l'utilisateur (paginÃ©)
-    - POST /api/v1/projects/ : CrÃ©er un projet (crÃ©ateur devient auteur + contributeur)
-    - GET /api/v1/projects/{id}/ : DÃ©tails du projet
+    - GET /api/v1/projects/ : Liste des projets de l'utilisateur (paginé)
+    - POST /api/v1/projects/ : Créer un projet (créateur devient auteur + contributeur)
+    - GET /api/v1/projects/{id}/ : Détails du projet
     - PUT /api/v1/projects/{id}/ : Modifier le projet (auteur uniquement)
     - DELETE /api/v1/projects/{id}/ : Supprimer le projet (auteur uniquement)
     - POST /api/v1/projects/{id}/contributor/ : Ajouter un contributeur
     - DELETE /api/v1/projects/{id}/contributor/?user_id=X : Retirer un contributeur
 
-    SÃ©curitÃ© :
+    Sécurité :
     - Authentification JWT requise
     - Seuls les contributeurs voient le projet
     - Seul l'auteur peut modifier/supprimer
@@ -63,16 +63,16 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Filtrage des projets : l'utilisateur doit Ãªtre contributeur.
+        Filtrage des projets : l'utilisateur doit être contributeur.
 
-        SÃ©curitÃ© : Seuls les projets oÃ¹ l'utilisateur est contributeur sont retournÃ©s.
+        Sécurité : Seuls les projets où l'utilisateur est contributeur sont retournés.
         Optimisation : select_related pour l'auteur, prefetch_related pour les contributeurs.
         """
         queryset = Project.objects.filter(
             contributors__user=self.request.user
         ).distinct()
 
-        # Optimisation des requÃªtes ORM
+        # Optimisation des requêtes ORM
         if self.action == 'list':
             queryset = queryset.select_related('author').prefetch_related(
                 'contributors__user'
@@ -115,17 +115,17 @@ class ProjectViewSet(viewsets.ModelViewSet):
         Query params (DELETE) :
         ?user_id=<user_id>
 
-        SÃ©curitÃ© : Seuls les contributeurs du projet peuvent gÃ©rer les membres.
+        Sécurité : Seuls les contributeurs du projet peuvent gérer les membres.
         """
         project = self.get_object()
 
-        # VÃ©rifier si l'utilisateur est contributeur du projet
+        # Vérifier si l'utilisateur est contributeur du projet
         if not Contributor.objects.filter(
             user=request.user,
             project=project
         ).exists():
             return Response(
-                {'detail': 'Seuls les contributeurs peuvent gÃ©rer les membres du projet.'},
+                {'detail': 'Seuls les contributeurs peuvent gérer les membres du projet.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -175,19 +175,19 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 class IssueViewSet(viewsets.ModelViewSet):
     """
-    ViewSet pour la gestion des problÃ¨mes (issues) dans un projet.
+    ViewSet pour la gestion des problèmes (issues) dans un projet.
 
     Endpoints :
-    - GET /api/v1/projects/{project_id}/issues/ : Liste des issues du projet (paginÃ©)
-    - POST /api/v1/projects/{project_id}/issues/ : CrÃ©er une issue
-    - GET /api/v1/projects/{project_id}/issues/{id}/ : DÃ©tails de l'issue
+    - GET /api/v1/projects/{project_id}/issues/ : Liste des issues du projet (paginé)
+    - POST /api/v1/projects/{project_id}/issues/ : Créer une issue
+    - GET /api/v1/projects/{project_id}/issues/{id}/ : Détails de l'issue
     - PUT /api/v1/projects/{project_id}/issues/{id}/ : Modifier l'issue (auteur uniquement)
     - DELETE /api/v1/projects/{project_id}/issues/{id}/ : Supprimer l'issue (auteur uniquement)
 
-    SÃ©curitÃ© :
+    Sécurité :
     - Seuls les contributeurs du projet peuvent voir les issues
     - Seul l'auteur peut modifier/supprimer son issue
-    - L'assignÃ© doit Ãªtre contributeur du projet (validation dans serializer)
+    - L'assigné doit être contributeur du projet (validation dans serializer)
     """
     permission_classes = [IsAuthenticated, IsProjectContributor, IsContributorOrReadOnly]
     basename = 'issue'
@@ -200,24 +200,24 @@ class IssueViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Filtrage des issues : l'utilisateur doit Ãªtre contributeur du projet.
+        Filtrage des issues : l'utilisateur doit être contributeur du projet.
 
-        SÃ©curitÃ© : VÃ©rifie que l'utilisateur est contributeur avant de retourner les issues.
+        Sécurité : Vérifie que l'utilisateur est contributeur avant de retourner les issues.
         Si non-contributeur, retourne un queryset vide.
 
-        Optimisation : select_related pour auteur/assignÃ©, prefetch_related pour commentaires.
+        Optimisation : select_related pour auteur/assigné, prefetch_related pour commentaires.
         """
         project_id = self.kwargs.get('project_pk')
         queryset = Issue.objects.filter(project_id=project_id)
 
-        # VÃ©rifier que l'utilisateur est contributeur du projet
+        # Vérifier que l'utilisateur est contributeur du projet
         if not Contributor.objects.filter(
             user=self.request.user,
             project_id=project_id
         ).exists():
             return queryset.none()
 
-        # Optimisation des requÃªtes ORM
+        # Optimisation des requêtes ORM
         if self.action == 'list':
             queryset = queryset.select_related('author', 'assignee').prefetch_related(
                 'comments'
@@ -230,7 +230,7 @@ class IssueViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        """CrÃ©er l'issue avec l'utilisateur actuel comme auteur."""
+        """Créer l'issue avec l'utilisateur actuel comme auteur."""
         project_id = self.kwargs.get('project_pk')
         project = get_object_or_404(Project, id=project_id)
         serializer.save(
@@ -239,7 +239,7 @@ class IssueViewSet(viewsets.ModelViewSet):
         )
 
     def get_serializer_context(self):
-        """Passer le projet au serializer pour validation (assignee doit Ãªtre contributeur)."""
+        """Passer le projet au serializer pour validation (assignee doit être contributeur)."""
         context = super().get_serializer_context()
         project_id = self.kwargs.get('project_pk')
         if project_id:
@@ -281,9 +281,9 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Filtrage des commentaires : l'utilisateur doit Ãªtre contributeur du projet de l'issue.
+        Filtrage des commentaires : l'utilisateur doit être contributeur du projet de l'issue.
 
-        SÃ©curitÃ© : VÃ©rifie via l'issue que l'utilisateur est contributeur du projet.
+        Sécurité : Vérifie via l'issue que l'utilisateur est contributeur du projet.
         Si non-contributeur, retourne un queryset vide.
 
         Optimisation : select_related pour l'auteur.
@@ -291,7 +291,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         issue_id = self.kwargs.get('issue_pk')
         queryset = Comment.objects.filter(issue_id=issue_id)
 
-        # RÃ©cupÃ©rer l'issue et vÃ©rifier que l'utilisateur est contributeur du projet
+        # Récupérer l'issue et vérifier que l'utilisateur est contributeur du projet
         issue = get_object_or_404(Issue, id=issue_id)
         if not Contributor.objects.filter(
             user=self.request.user,
@@ -305,7 +305,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        """CrÃ©er le commentaire avec l'utilisateur actuel comme auteur."""
+        """Créer le commentaire avec l'utilisateur actuel comme auteur."""
         issue_id = self.kwargs.get('issue_pk')
         issue = get_object_or_404(Issue, id=issue_id)
         serializer.save(

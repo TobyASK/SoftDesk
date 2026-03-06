@@ -1,16 +1,16 @@
 ﻿"""
-ModÃ¨les pour l'application tracker - Gestion de projets et suivi des problÃ¨mes.
+Modèles pour l'application tracker - Gestion de projets et suivi des problèmes.
 
 Relations :
-- Project : Ressource principale crÃ©Ã©e par un auteur
-- Contributor : Lien M2M entre User et Project (dÃ©finit l'accÃ¨s)
-- Issue : ProblÃ¨me/tÃ¢che dans un projet (assignable Ã  un contributeur)
-- Comment : Commentaire sur un problÃ¨me
+- Project : Ressource principale créée par un auteur
+- Contributor : Lien M2M entre User et Project (définit l'accès)
+- Issue : Problème/tâche dans un projet (assignable à un contributeur)
+- Comment : Commentaire sur un problème
 
-RÃ¨gles de sÃ©curitÃ© :
-- Seuls les contributeurs peuvent accÃ©der Ã  un projet
+Règles de sécurité :
+- Seuls les contributeurs peuvent accéder à un projet
 - Seul l'auteur peut modifier/supprimer ses ressources
-- L'assignÃ© d'un problÃ¨me doit Ãªtre contributeur du projet
+- L'assigné d'un problème doit être contributeur du projet
 """
 
 from django.db import models
@@ -25,7 +25,7 @@ class Project(models.Model):
     """
     Projet - Ressource principale de l'application.
 
-    Le crÃ©ateur devient automatiquement auteur + contributeur.
+    Le créateur devient automatiquement auteur + contributeur.
     Seuls les contributeurs peuvent voir le projet.
     Seul l'auteur peut le modifier/supprimer.
     """
@@ -40,7 +40,7 @@ class Project(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    # Auteur du projet (crÃ©ateur)
+    # Auteur du projet (créateur)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -59,9 +59,9 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        CrÃ©ation automatique du contributeur pour l'auteur.
-        Lors de la crÃ©ation d'un projet, l'auteur devient automatiquement
-        contributeur avec le rÃ´le 'author'.
+        Création automatique du contributeur pour l'auteur.
+        Lors de la création d'un projet, l'auteur devient automatiquement
+        contributeur avec le rôle 'author'.
         """
         is_new = self.pk is None
         super().save(*args, **kwargs)
@@ -77,11 +77,11 @@ class Contributor(models.Model):
     """
     Contributeur - Lien entre un utilisateur et un projet.
 
-    DÃ©finit les droits d'accÃ¨s Ã  un projet :
-    - 'author' : CrÃ©ateur du projet (peut tout modifier)
-    - 'contributor' : Contributeur simple (peut voir et crÃ©er issues/comments)
+    Définit les droits d'accès à un projet :
+    - 'author' : Créateur du projet (peut tout modifier)
+    - 'contributor' : Contributeur simple (peut voir et créer issues/comments)
 
-    RÃ¨gle : Seuls les contributeurs peuvent accÃ©der au projet.
+    Règle : Seuls les contributeurs peuvent accéder au projet.
     """
     ROLE_CHOICES = [
         ('author', 'Author'),
@@ -118,18 +118,18 @@ class Contributor(models.Model):
 
 class Issue(models.Model):
     """
-    ProblÃ¨me/TÃ¢che dans un projet.
+    Problème/Tâche dans un projet.
 
-    CaractÃ©ristiques :
-    - PrioritÃ© : LOW, MEDIUM, HIGH
+    Caractéristiques :
+    - Priorité : LOW, MEDIUM, HIGH
     - Tag : BUG, FEATURE, TASK
     - Statut : To Do, In Progress, Finished
-    - Assignee : Utilisateur assignÃ© (doit Ãªtre contributeur du projet)
+    - Assignee : Utilisateur assigné (doit être contributeur du projet)
 
-    RÃ¨gles :
+    Règles :
     - Seuls les contributeurs du projet peuvent voir les issues
     - Seul l'auteur peut modifier/supprimer l'issue
-    - L'assignÃ© doit Ãªtre contributeur (validation dans clean())
+    - L'assigné doit être contributeur (validation dans clean())
     """
     PRIORITY_CHOICES = [
         ('LOW', 'Low'),
@@ -172,16 +172,16 @@ class Issue(models.Model):
         choices=STATUS_CHOICES,
         default='To Do'
     )
-    # Utilisateur assignÃ© au problÃ¨me (doit Ãªtre contributeur du projet)
+    # Utilisateur assigné au problème (doit être contributeur du projet)
     assignee = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='assigned_issues',
-        help_text="Doit Ãªtre un contributeur du projet"
+        help_text="Doit être un contributeur du projet"
     )
-    # Auteur du problÃ¨me
+    # Auteur du problème
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -200,8 +200,8 @@ class Issue(models.Model):
 
     def clean(self):
         """
-        Validation : l'assignÃ© doit Ãªtre contributeur du projet.
-        Cette rÃ¨gle garantit que seuls les contributeurs peuvent Ãªtre assignÃ©s.
+        Validation : l'assigné doit être contributeur du projet.
+        Cette règle garantit que seuls les contributeurs peuvent être assignés.
         """
         super().clean()
         if self.assignee:
@@ -210,16 +210,16 @@ class Issue(models.Model):
                 project=self.project
             ).exists():
                 raise ValidationError({
-                    'assignee': "L'assignÃ© doit Ãªtre un contributeur du projet."
+                    'assignee': "L'assigné doit être un contributeur du projet."
                 })
 
 
 class Comment(models.Model):
     """
-    Commentaire sur un problÃ¨me (Issue).
+    Commentaire sur un problème (Issue).
 
     Utilise un UUID comme identifiant primaire.
-    Seuls les contributeurs du projet peuvent voir/crÃ©er des commentaires.
+    Seuls les contributeurs du projet peuvent voir/créer des commentaires.
     Seul l'auteur peut modifier/supprimer son commentaire.
     """
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

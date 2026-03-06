@@ -1,8 +1,8 @@
 ﻿"""
-SÃ©rialiseurs pour l'application accounts (gestion des utilisateurs).
+Sérialiseurs pour l'application accounts (gestion des utilisateurs).
 
 Contient :
-- UserRegistrationSerializer : Inscription avec validation d'Ã¢ge >= 15
+- UserRegistrationSerializer : Inscription avec validation d'âge >= 15
 - UserDetailSerializer : Affichage du profil utilisateur
 - UserUpdateSerializer : Modification du profil
 """
@@ -16,15 +16,15 @@ User = get_user_model()
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
-    SÃ©rialiseur pour l'inscription d'un utilisateur.
+    Sérialiseur pour l'inscription d'un utilisateur.
 
     Validations :
     - Ã‚ge >= 15 ans (RGPD)
-    - Mot de passe >= 8 caractÃ¨res
+    - Mot de passe >= 8 caractères
     - Confirmation du mot de passe
     - Nom d'utilisateur unique
     """
-    # Mot de passe (non visible dans les rÃ©ponses API)
+    # Mot de passe (non visible dans les réponses API)
     password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -65,7 +65,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate_age(self, value):
         """
-        Validation de l'Ã¢ge minimum (15 ans) - ConformitÃ© RGPD.
+        Validation de l'âge minimum (15 ans) - Conformité RGPD.
         Cette validation est critique pour l'inscription.
         """
         if value < 15:
@@ -76,8 +76,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """
-        Validation globale : vÃ©rification que les mots de passe correspondent
-        et que le nom d'utilisateur n'est pas dÃ©jÃ  pris.
+        Validation globale : vérification que les mots de passe correspondent
+        et que le nom d'utilisateur n'est pas déjÃ  pris.
         """
         if attrs.get('password') != attrs.get('password_confirm'):
             raise serializers.ValidationError({
@@ -86,15 +86,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         if User.objects.filter(username=attrs.get('username')).exists():
             raise serializers.ValidationError({
-                'username': 'Ce nom d\'utilisateur est dÃ©jÃ  utilisÃ©.'
+                'username': 'Ce nom d\'utilisateur est déjÃ  utilisé.'
             })
 
         return attrs
 
     def create(self, validated_data):
         """
-        CrÃ©ation de l'utilisateur avec hachage du mot de passe.
-        Le mot de passe est hachÃ© avec set_password() pour la sÃ©curitÃ©.
+        Création de l'utilisateur avec hachage du mot de passe.
+        Le mot de passe est haché avec set_password() pour la sécurité.
         """
         validated_data.pop('password_confirm', None)
         password = validated_data.pop('password')

@@ -1,14 +1,14 @@
 ﻿"""
-SÃ©rialiseurs pour l'application tracker.
+Sérialiseurs pour l'application tracker.
 
 Contient :
 - ProjectListSerializer / ProjectDetailSerializer : Gestion des projets
 - ContributorSerializer : Gestion des contributeurs
-- IssueListSerializer / IssueDetailSerializer : Gestion des problÃ¨mes (issues)
+- IssueListSerializer / IssueDetailSerializer : Gestion des problèmes (issues)
 - CommentSerializer : Gestion des commentaires
 
-Validations mÃ©tier importantes :
-- L'assignÃ© d'une issue doit Ãªtre contributeur du projet
+Validations métier importantes :
+- L'assigné d'une issue doit être contributeur du projet
 - Pas de doublons de contributeurs
 """
 
@@ -20,7 +20,7 @@ User = get_user_model()
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
-    """Informations de base sur un utilisateur pour sÃ©rialisation imbriquÃ©e."""
+    """Informations de base sur un utilisateur pour sérialisation imbriquée."""
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
@@ -29,9 +29,9 @@ class UserBasicSerializer(serializers.ModelSerializer):
 
 class ContributorSerializer(serializers.ModelSerializer):
     """
-    SÃ©rialiseur pour Contributor.
+    Sérialiseur pour Contributor.
 
-    Validation : EmpÃªche les doublons (un utilisateur ne peut Ãªtre contributeur qu'une fois).
+    Validation : Empêche les doublons (un utilisateur ne peut être contributeur qu'une fois).
     """
     user = UserBasicSerializer(read_only=True)
     user_id = serializers.PrimaryKeyRelatedField(
@@ -53,18 +53,18 @@ class ContributorSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        EmpÃªcher les doublons : un utilisateur ne peut Ãªtre contributeur qu'une fois.
+        Empêcher les doublons : un utilisateur ne peut être contributeur qu'une fois.
         """
         contributor, created = Contributor.objects.get_or_create(**validated_data)
         if not created:
             raise serializers.ValidationError(
-                "Cet utilisateur est dÃ©jÃ  contributeur de ce projet."
+                "Cet utilisateur est déjÃ  contributeur de ce projet."
             )
         return contributor
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
-    """SÃ©rialiseur pour la liste des projets (vue simplifiÃ©e)."""
+    """Sérialiseur pour la liste des projets (vue simplifiée)."""
     author = UserBasicSerializer(read_only=True)
     contributors_count = serializers.SerializerMethodField()
 
@@ -86,7 +86,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
-    """SÃ©rialiseur pour les dÃ©tails d'un projet (vue complÃ¨te)."""
+    """Sérialiseur pour les détails d'un projet (vue complète)."""
     author = UserBasicSerializer(read_only=True)
     contributors = ContributorSerializer(many=True, read_only=True)
 
@@ -156,9 +156,9 @@ class IssueListSerializer(serializers.ModelSerializer):
 
 class IssueDetailSerializer(serializers.ModelSerializer):
     """
-    SÃ©rialiseur pour les dÃ©tails d'une issue (avec commentaires).
+    Sérialiseur pour les détails d'une issue (avec commentaires).
 
-    Validation critique : L'assignÃ© doit Ãªtre contributeur du projet.
+    Validation critique : L'assigné doit être contributeur du projet.
     """
     author = UserBasicSerializer(read_only=True, allow_null=True)
     assignee_id = serializers.PrimaryKeyRelatedField(
@@ -189,22 +189,22 @@ class IssueDetailSerializer(serializers.ModelSerializer):
 
     def validate_assignee_id(self, value):
         """
-        Validation critique : L'assignÃ© doit Ãªtre contributeur du projet.
+        Validation critique : L'assigné doit être contributeur du projet.
 
-        Cette validation empÃªche d'assigner une issue Ã  quelqu'un qui n'a pas accÃ¨s au projet.
-        Le projet est rÃ©cupÃ©rÃ© depuis le contexte (passÃ© par la vue).
+        Cette validation empêche d'assigner une issue Ã  quelqu'un qui n'a pas accès au projet.
+        Le projet est récupéré depuis le contexte (passé par la vue).
         """
         if value is None:
             return value
 
         project = self.context.get('project')
         if not project:
-            # Fallback : rÃ©cupÃ©rer depuis l'instance si modification
+            # Fallback : récupérer depuis l'instance si modification
             if self.instance:
                 project = self.instance.project
             else:
                 raise serializers.ValidationError(
-                    "Les informations du projet sont nÃ©cessaires pour valider l'assignÃ©."
+                    "Les informations du projet sont nécessaires pour valider l'assigné."
                 )
 
         if not Contributor.objects.filter(
@@ -212,12 +212,12 @@ class IssueDetailSerializer(serializers.ModelSerializer):
             project=project
         ).exists():
             raise serializers.ValidationError(
-                "L'assignÃ© doit Ãªtre un contributeur du projet."
+                "L'assigné doit être un contributeur du projet."
             )
         return value
 
     def create(self, validated_data):
-        """DÃ©finir l'auteur comme utilisateur actuel lors de la crÃ©ation."""
+        """Définir l'auteur comme utilisateur actuel lors de la création."""
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
 
