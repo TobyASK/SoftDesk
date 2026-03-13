@@ -1,5 +1,5 @@
 """
-Permissions for accounts app.
+Permissions pour l'application accounts.
 """
 
 from rest_framework.permissions import BasePermission
@@ -7,7 +7,7 @@ from rest_framework.permissions import BasePermission
 
 class IsOwnerOrReadOnly(BasePermission):
     """
-    Permission to allow only the owner of an object to edit it.
+    Permission qui autorise uniquement le propriétaire à modifier l'objet.
     """
     def has_object_permission(self, request, view, obj):
         if request.method in ['GET', 'HEAD', 'OPTIONS']:

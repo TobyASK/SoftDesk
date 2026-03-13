@@ -12,16 +12,24 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
 
-# Build paths inside the project
+# Construit les chemins internes au projet
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
+# Sécurité
+SECRET_KEY = config(
+    'SECRET_KEY',
+    default='django-insecure-dev-key-change-in-production'
+)
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,testserver', cast=Csv())
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1,testserver',
+    cast=Csv(),
+)
 
-# Application definition
-# Apps installées : accounts (CustomUser + auth) + tracker (projets/issues/comments)
+# Définition des applications
+# Apps installées : accounts (CustomUser + auth)
+# + tracker (projets/issues/comments)
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -29,10 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  # Django REST Framework
-    'rest_framework_simplejwt',  # JWT pour authentification
+    'rest_framework',  # Framework REST de Django
+    'rest_framework_simplejwt',  # Authentification JWT
     'accounts',  # Gestion des utilisateurs (CustomUser)
-    'tracker',  # Gestion des projets, issues, comments
+    'tracker',  # Gestion des projets, issues, commentaires
 ]
 
 MIDDLEWARE = [
@@ -65,7 +73,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'softdesk.wsgi.application'
 
-# Database
+# Base de données
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -73,32 +81,44 @@ DATABASES = {
     }
 }
 
-# Password validation
+# Validation des mots de passe
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'UserAttributeSimilarityValidator'
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'MinimumLengthValidator'
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'CommonPasswordValidator'
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'NumericPasswordValidator'
+        ),
     },
 ]
 
-# Internationalization
+# Internationalisation
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# Fichiers statiques
 STATIC_URL = '/static/'
 
-# Default primary key field type
+# Type de clé primaire par défaut
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Modèle utilisateur personnalisé (CustomUser avec RGPD)
@@ -132,5 +152,9 @@ SIMPLE_JWT = {
 
 # HTTPS (sécurité en production)
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
-SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+SESSION_COOKIE_SECURE = config(
+    'SESSION_COOKIE_SECURE',
+    default=False,
+    cast=bool,
+)
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)

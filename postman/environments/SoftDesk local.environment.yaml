@@ -1,0 +1,20 @@
+name: SoftDesk local
+values:
+  - key: base_url
+    value: 'http://localhost:8000/api/v1'
+    enabled: true
+  - key: access_token
+    value: ''
+    enabled: true
+  - key: refresh_token
+    value: ''
+    enabled: true
+  - key: project_id
+    value: ''
+    enabled: true
+  - key: issue_id
+    value: ''
+    enabled: true
+  - key: comment_uuid
+    value: ''
+    enabled: true

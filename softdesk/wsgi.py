@@ -1,5 +1,5 @@
 """
-WSGI config for softdesk project.
+Configuration WSGI pour le projet softdesk.
 """
 
 import os

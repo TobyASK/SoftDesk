@@ -1,5 +1,5 @@
 """
-Tests for accounts app - User registration, authentication, and profile management.
+Tests de l'application accounts : inscription, authentification et profil.
 """
 
 import pytest
@@ -11,10 +11,10 @@ User = get_user_model()
 
 @pytest.mark.django_db
 class TestUserRegistration:
-    """Test user registration endpoint."""
+    """Teste l'endpoint d'inscription utilisateur."""
 
     def test_register_valid_user(self, api_client, user_data):
-        """Test successful user registration."""
+        """Vérifie une inscription utilisateur réussie."""
         response = api_client.post('/api/v1/auth/register/', user_data)
         assert response.status_code == status.HTTP_201_CREATED
         assert 'username' in response.data
@@ -22,21 +22,31 @@ class TestUserRegistration:
         assert User.objects.filter(username=user_data['username']).exists()
 
     def test_register_user_age_below_15(self, api_client, user_under_15_data):
-        """Test registration fails for users under 15 years old."""
-        response = api_client.post('/api/v1/auth/register/', user_under_15_data)
+        """Vérifie que l'inscription échoue pour un âge inférieur à 15 ans."""
+        response = api_client.post(
+            '/api/v1/auth/register/',
+            user_under_15_data
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert 'age' in response.data
-        assert not User.objects.filter(username=user_under_15_data['username']).exists()
+        assert not User.objects.filter(
+            username=user_under_15_data['username']
+        ).exists()
 
     def test_register_password_mismatch(self, api_client, user_data):
-        """Test registration fails when passwords don't match."""
+        """Vérifie l'échec si les mots de passe ne correspondent pas."""
         user_data['password_confirm'] = 'differentpassword'
         response = api_client.post('/api/v1/auth/register/', user_data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert 'password_confirm' in response.data
 
-    def test_register_duplicate_username(self, api_client, user_data, authenticated_user):
-        """Test registration fails for duplicate username."""
+    def test_register_duplicate_username(
+        self,
+        api_client,
+        user_data,
+        authenticated_user
+    ):
+        """Vérifie l'échec si le nom d'utilisateur existe déjà."""
         user_data['email'] = 'different@example.com'
         user_data['username'] = authenticated_user.username
         response = api_client.post('/api/v1/auth/register/', user_data)
@@ -44,7 +54,7 @@ class TestUserRegistration:
         assert 'username' in response.data
 
     def test_register_missing_required_field(self, api_client):
-        """Test registration fails when required field is missing."""
+        """Vérifie l'échec si un champ obligatoire est absent."""
         data = {
             'username': 'newuser',
             'email': 'new@example.com',
@@ -53,7 +63,7 @@ class TestUserRegistration:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_register_short_password(self, api_client, user_data):
-        """Test registration fails for password < 8 characters."""
+        """Vérifie l'échec pour un mot de passe < 8 caractères."""
         user_data['password'] = 'short'
         user_data['password_confirm'] = 'short'
         response = api_client.post('/api/v1/auth/register/', user_data)
@@ -62,10 +72,10 @@ class TestUserRegistration:
 
 @pytest.mark.django_db
 class TestJWTAuthentication:
-    """Test JWT authentication endpoints."""
+    """Teste les endpoints d'authentification JWT."""
 
     def test_obtain_token(self, api_client, authenticated_user):
-        """Test JWT token obtention."""
+        """Vérifie l'obtention d'un token JWT."""
         response = api_client.post('/api/v1/auth/token/', {
             'username': authenticated_user.username,
             'password': 'securepass123',
@@ -74,8 +84,12 @@ class TestJWTAuthentication:
         assert 'access' in response.data
         assert 'refresh' in response.data
 
-    def test_obtain_token_invalid_credentials(self, api_client, authenticated_user):
-        """Test token obtention fails with invalid credentials."""
+    def test_obtain_token_invalid_credentials(
+        self,
+        api_client,
+        authenticated_user
+    ):
+        """Vérifie l'échec d'obtention avec des identifiants invalides."""
         response = api_client.post('/api/v1/auth/token/', {
             'username': authenticated_user.username,
             'password': 'wrongpassword',
@@ -83,15 +97,15 @@ class TestJWTAuthentication:
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_refresh_token(self, api_client, authenticated_user):
-        """Test token refresh."""
-        # Get initial tokens
+        """Vérifie le rafraîchissement du token."""
+        # Récupère les tokens initiaux
         response = api_client.post('/api/v1/auth/token/', {
             'username': authenticated_user.username,
             'password': 'securepass123',
         })
         refresh_token = response.data['refresh']
 
-        # Refresh token
+        # Rafraîchit le token
         response = api_client.post('/api/v1/auth/token/refresh/', {
             'refresh': refresh_token,
         })
@@ -99,12 +113,16 @@ class TestJWTAuthentication:
         assert 'access' in response.data
 
     def test_access_protected_endpoint_without_auth(self, api_client):
-        """Test accessing protected endpoint without authentication fails."""
+        """Vérifie l'échec d'accès sans authentification."""
         response = api_client.get('/api/v1/auth/users/profile/')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_access_protected_endpoint_with_token(self, api_client, authenticated_user):
-        """Test accessing protected endpoint with valid token."""
+    def test_access_protected_endpoint_with_token(
+        self,
+        api_client,
+        authenticated_user
+    ):
+        """Vérifie l'accès avec un token valide."""
         response = api_client.post('/api/v1/auth/token/', {
             'username': authenticated_user.username,
             'password': 'securepass123',
@@ -119,17 +137,21 @@ class TestJWTAuthentication:
 
 @pytest.mark.django_db
 class TestUserProfile:
-    """Test user profile viewing and updating."""
+    """Teste la consultation et la mise à jour du profil utilisateur."""
 
     def test_view_own_profile(self, authenticated_client, authenticated_user):
-        """Test viewing own profile."""
+        """Vérifie la consultation de son propre profil."""
         response = authenticated_client.get('/api/v1/auth/users/profile/')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['username'] == authenticated_user.username
         assert response.data['age'] == authenticated_user.age
 
-    def test_update_own_profile(self, authenticated_client, authenticated_user):
-        """Test updating own profile."""
+    def test_update_own_profile(
+        self,
+        authenticated_client,
+        authenticated_user
+    ):
+        """Vérifie la mise à jour de son propre profil."""
         data = {
             'email': 'newemail@example.com',
             'first_name': 'NewFirst',
@@ -150,7 +172,9 @@ class TestUserProfile:
         authenticated_user,
         another_user
     ):
-        """Test cannot update other user's profile."""
+        """Vérifie qu'on ne peut pas modifier
+        le profil d'un autre utilisateur.
+        """
         data = {
             'email': 'hacked@example.com',
             'first_name': 'Hacked',
@@ -164,7 +188,7 @@ class TestUserProfile:
         assert another_user.email != 'hacked@example.com'
 
     def test_list_users(self, authenticated_client):
-        """Test listing users."""
+        """Vérifie la liste des utilisateurs."""
         response = authenticated_client.get('/api/v1/auth/users/')
         assert response.status_code == status.HTTP_200_OK
-        assert 'results' in response.data  # Paginated response
+        assert 'results' in response.data  # Réponse paginée

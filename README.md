@@ -26,8 +26,8 @@ Une API simple et professionnelle pour gérer des projets, des problèmes et des
 ### 1. Cloner le dépôt
 
 ```bash
-git clone <repository-url>
-cd softdesk
+git clone https://github.com/TobyASK/SoftDesk
+cd SoftDesk
 ```
 
 ### 2. Créer le fichier d'environnement

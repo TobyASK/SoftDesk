@@ -16,7 +16,6 @@ Règles de sécurité :
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-import uuid
 
 User = get_user_model()
 
@@ -36,13 +35,12 @@ class Project(models.Model):
         ('Android', 'Android'),
     ]
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     description = models.TextField()
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     # Auteur du projet (créateur)
     author = models.ForeignKey(
-        User,
+        'accounts.CustomUser',
         on_delete=models.CASCADE,
         related_name='authored_projects'
     )
@@ -56,21 +54,6 @@ class Project(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_type_display()})"
-
-    def save(self, *args, **kwargs):
-        """
-        Création automatique du contributeur pour l'auteur.
-        Lors de la création d'un projet, l'auteur devient automatiquement
-        contributeur avec le rôle 'author'.
-        """
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-        if is_new:
-            Contributor.objects.get_or_create(
-                user=self.author,
-                project=self,
-                defaults={'role': 'author'}
-            )
 
 
 class Contributor(models.Model):
@@ -88,14 +71,13 @@ class Contributor(models.Model):
         ('contributor', 'Contributor'),
     ]
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
-        User,
+        'accounts.CustomUser',
         on_delete=models.CASCADE,
         related_name='contributor_projects'
     )
     project = models.ForeignKey(
-        Project,
+        'tracker.Project',
         on_delete=models.CASCADE,
         related_name='contributors'
     )
@@ -113,7 +95,10 @@ class Contributor(models.Model):
         ordering = ['-created_time']
 
     def __str__(self):
-        return f"{self.user.username} - {self.project.name} ({self.get_role_display()})"
+        return (
+            f"{self.user.username} - {self.project.name} "
+            f"({self.get_role_display()})"
+        )
 
 
 class Issue(models.Model):
@@ -149,9 +134,8 @@ class Issue(models.Model):
         ('Finished', 'Finished'),
     ]
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(
-        Project,
+        'tracker.Project',
         on_delete=models.CASCADE,
         related_name='issues'
     )
@@ -174,7 +158,7 @@ class Issue(models.Model):
     )
     # Utilisateur assigné au problème (doit être contributeur du projet)
     assignee = models.ForeignKey(
-        User,
+        'accounts.CustomUser',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -183,7 +167,7 @@ class Issue(models.Model):
     )
     # Auteur du problème
     author = models.ForeignKey(
-        User,
+        'accounts.CustomUser',
         on_delete=models.CASCADE,
         related_name='created_issues'
     )
@@ -210,7 +194,9 @@ class Issue(models.Model):
                 project=self.project
             ).exists():
                 raise ValidationError({
-                    'assignee': "L'assigné doit être un contributeur du projet."
+                    'assignee': (
+                        "L'assigné doit être un contributeur du projet."
+                    )
                 })
 
 
@@ -218,20 +204,18 @@ class Comment(models.Model):
     """
     Commentaire sur un problème (Issue).
 
-    Utilise un UUID comme identifiant primaire.
     Seuls les contributeurs du projet peuvent voir/créer des commentaires.
     Seul l'auteur peut modifier/supprimer son commentaire.
     """
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     issue = models.ForeignKey(
-        Issue,
+        'tracker.Issue',
         on_delete=models.CASCADE,
         related_name='comments'
     )
     description = models.TextField()
     # Auteur du commentaire
     author = models.ForeignKey(
-        User,
+        'accounts.CustomUser',
         on_delete=models.CASCADE,
         related_name='created_comments'
     )

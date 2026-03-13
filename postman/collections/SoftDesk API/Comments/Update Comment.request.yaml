@@ -1,0 +1,23 @@
+$kind: http-request
+name: Update Comment
+method: PATCH
+url: '{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/comments/{{comment_uuid}}/'
+order: 4000
+headers:
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: project_id
+    value: '{{project_id}}'
+  - key: issue_id
+    value: '{{issue_id}}'
+  - key: comment_uuid
+    value: '{{comment_uuid}}'
+body:
+  type: json
+  content: |-
+    {
+      "description": "Updated comment text"
+    }

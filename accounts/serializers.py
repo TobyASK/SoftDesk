@@ -56,10 +56,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         ]
 
     def validate_password(self, value):
-        """Validate password strength."""
+        """Valide la robustesse du mot de passe."""
         if len(value) < 8:
             raise serializers.ValidationError(
-                "Password must be at least 8 characters long."
+                "Le mot de passe doit contenir au moins 8 caractères."
             )
         return value
 
@@ -107,7 +107,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 class UserDetailSerializer(serializers.ModelSerializer):
     """
-    Serializer for user profile details.
+    Sérialiseur pour les détails du profil utilisateur.
     """
     class Meta:
         model = User
@@ -128,7 +128,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     """
-    Serializer for user profile updates.
+    Sérialiseur pour la mise à jour du profil utilisateur.
     """
     class Meta:
         model = User
@@ -143,7 +143,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
-    Custom token serializer to include user details.
+    Sérialiseur de token personnalisé pour inclure des infos utilisateur.
     """
     @classmethod
     def get_token(cls, user):

@@ -1,0 +1,44 @@
+$kind: http-request
+name: Obtain Token
+method: POST
+url: '{{base_url}}/auth/token/'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "john_doe",
+      "password": "securepass123"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200', function () {
+        pm.response.to.have.status(200);
+      });
+
+      let data = {};
+      try {
+        data = pm.response.json();
+      } catch (e) {
+        pm.test('Response is valid JSON', function () {
+          throw e;
+        });
+      }
+
+      const access = data.access || data.access_token;
+      const refresh = data.refresh || data.refresh_token;
+
+      pm.test('Access token present', function () {
+        pm.expect(access, 'access/access_token').to.be.a('string').and.not.empty;
+      });
+      pm.test('Refresh token present', function () {
+        pm.expect(refresh, 'refresh/refresh_token').to.be.a('string').and.not.empty;
+      });
+
+      pm.environment.set('access_token', access);
+      pm.environment.set('refresh_token', refresh);

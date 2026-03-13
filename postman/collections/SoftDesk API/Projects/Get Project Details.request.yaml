@@ -1,0 +1,18 @@
+$kind: http-request
+name: Get Project Details
+method: GET
+url: '{{base_url}}/projects/{{project_id}}/'
+order: 3000
+headers:
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+pathVariables:
+  - key: project_id
+    value: '{{project_id}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200', function () {
+        pm.response.to.have.status(200);
+      });

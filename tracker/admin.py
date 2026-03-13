@@ -1,5 +1,5 @@
 """
-Admin configuration for tracker app.
+Configuration de l'admin pour l'application tracker.
 """
 
 from django.contrib import admin
@@ -8,7 +8,7 @@ from .models import Project, Contributor, Issue, Comment
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    """Admin interface for Project model."""
+    """Interface d'administration pour le modèle `Project`."""
     list_display = ('name', 'type', 'author', 'created_time')
     list_filter = ('type', 'created_time')
     search_fields = ('name', 'description', 'author__username')
@@ -25,7 +25,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Contributor)
 class ContributorAdmin(admin.ModelAdmin):
-    """Admin interface for Contributor model."""
+    """Interface d'administration pour le modèle `Contributor`."""
     list_display = ('user', 'project', 'role', 'created_time')
     list_filter = ('role', 'created_time')
     search_fields = ('user__username', 'project__name')
@@ -42,10 +42,15 @@ class ContributorAdmin(admin.ModelAdmin):
 
 @admin.register(Issue)
 class IssueAdmin(admin.ModelAdmin):
-    """Admin interface for Issue model."""
-    list_display = ('title', 'project', 'priority', 'tag', 'status', 'author', 'created_time')
+    """Interface d'administration pour le modèle `Issue`."""
+    list_display = (
+        'title', 'project', 'priority', 'tag', 'status', 'author',
+        'created_time'
+    )
     list_filter = ('priority', 'tag', 'status', 'created_time')
-    search_fields = ('title', 'description', 'project__name', 'author__username')
+    search_fields = (
+        'title', 'description', 'project__name', 'author__username'
+    )
     readonly_fields = ('id', 'created_time', 'updated_time')
     fieldsets = (
         ('Issue Info', {
@@ -65,14 +70,14 @@ class IssueAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    """Admin interface for Comment model."""
-    list_display = ('uuid', 'issue', 'author', 'created_time')
+    """Interface d'administration pour le modèle `Comment`."""
+    list_display = ('id', 'issue', 'author', 'created_time')
     list_filter = ('created_time',)
     search_fields = ('description', 'issue__title', 'author__username')
-    readonly_fields = ('uuid', 'created_time', 'updated_time')
+    readonly_fields = ('id', 'created_time', 'updated_time')
     fieldsets = (
         ('Comment Info', {
-            'fields': ('uuid', 'issue', 'description')
+            'fields': ('id', 'issue', 'description')
         }),
         ('Metadata', {
             'fields': ('author', 'created_time', 'updated_time')

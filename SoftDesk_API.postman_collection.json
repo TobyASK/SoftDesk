@@ -28,7 +28,21 @@
               "host": ["{{base_url}}"],
               "path": ["auth", "register", ""]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.id) pm.collectionVariables.set('user_id', data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Obtain Token",
@@ -49,7 +63,23 @@
               "host": ["{{base_url}}"],
               "path": ["auth", "token", ""]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Token generated', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const data = pm.response.json();",
+                  "if (data.access) pm.collectionVariables.set('access_token', data.access);",
+                  "if (data.refresh) pm.collectionVariables.set('refresh_token', data.refresh);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Refresh Token",
@@ -83,9 +113,9 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/auth/users/profile/me/",
+              "raw": "{{base_url}}/auth/users/profile/",
               "host": ["{{base_url}}"],
-              "path": ["auth", "users", "profile", "me", ""]
+              "path": ["auth", "users", "profile", ""]
             }
           }
         },
@@ -171,7 +201,21 @@
               "host": ["{{base_url}}"],
               "path": ["projects", ""]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.id) pm.collectionVariables.set('project_id', data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Project Details",
@@ -216,24 +260,7 @@
           }
         },
         {
-          "name": "Delete Project",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/projects/{{project_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["projects", "{{project_id}}", ""]
-            }
-          }
-        },
-        {
-          "name": "Add Contributor",
+          "name": "Add Contributor (optional - needs another user)",
           "request": {
             "method": "POST",
             "header": [
@@ -248,7 +275,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": 2\n}"
+              "raw": "{\n  \"user_id\": {{user_id}}\n}"
             },
             "url": {
               "raw": "{{base_url}}/projects/{{project_id}}/contributor/",
@@ -258,7 +285,7 @@
           }
         },
         {
-          "name": "Remove Contributor",
+          "name": "Remove Contributor (optional - needs another user)",
           "request": {
             "method": "DELETE",
             "header": [
@@ -268,13 +295,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/projects/{{project_id}}/contributor/?user_id=2",
+              "raw": "{{base_url}}/projects/{{project_id}}/contributor/?user_id={{user_id}}",
               "host": ["{{base_url}}"],
               "path": ["projects", "{{project_id}}", "contributor", ""],
               "query": [
                 {
                   "key": "user_id",
-                  "value": "2"
+                  "value": "{{user_id}}"
                 }
               ]
             }
@@ -328,14 +355,28 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Fix responsive design\",\n  \"description\": \"The layout breaks on small screens\",\n  \"priority\": \"HIGH\",\n  \"tag\": \"BUG\",\n  \"status\": \"To Do\",\n  \"assignee_id\": 2\n}"
+              "raw": "{\n  \"title\": \"Fix responsive design\",\n  \"description\": \"The layout breaks on small screens\",\n  \"priority\": \"HIGH\",\n  \"tag\": \"BUG\",\n  \"status\": \"To Do\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/projects/{{project_id}}/issues/",
               "host": ["{{base_url}}"],
               "path": ["projects", "{{project_id}}", "issues", ""]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.id) pm.collectionVariables.set('issue_id', data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Issue Details",
@@ -378,24 +419,8 @@
               "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", ""]
             }
           }
-        },
-        {
-          "name": "Delete Issue",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/",
-              "host": ["{{base_url}}"],
-              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", ""]
-            }
-          }
         }
+
       ]
     },
     {
@@ -451,7 +476,21 @@
               "host": ["{{base_url}}"],
               "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", "comments", ""]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.id) pm.collectionVariables.set('comment_uuid', data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get Comment",
@@ -513,6 +552,45 @@
           }
         }
       ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "Delete Issue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "issues", "{{issue_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", ""]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
@@ -543,6 +621,11 @@
     },
     {
       "key": "comment_uuid",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "user_id",
       "value": "",
       "type": "default"
     }

@@ -1,0 +1,15 @@
+$kind: http-request
+name: Get Current User Profile
+method: GET
+url: '{{base_url}}/auth/users/profile/me/'
+order: 4000
+headers:
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200', function () {
+        pm.response.to.have.status(200);
+      });

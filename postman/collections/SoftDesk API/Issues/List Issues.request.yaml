@@ -1,0 +1,23 @@
+$kind: http-request
+name: List Issues
+method: GET
+url: '{{base_url}}/projects/{{project_id}}/issues/?page=1&page_size=10'
+order: 1000
+headers:
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+pathVariables:
+  - key: project_id
+    value: '{{project_id}}'
+queryParams:
+  - key: page
+    value: '1'
+  - key: page_size
+    value: '10'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200', function () {
+        pm.response.to.have.status(200);
+      });

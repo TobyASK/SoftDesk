@@ -1,5 +1,5 @@
 """
-Fixtures and configuration for tests.
+Fixtures et configuration des tests.
 """
 
 import pytest
@@ -12,13 +12,13 @@ User = get_user_model()
 
 @pytest.fixture
 def api_client():
-    """Provide APIClient instance."""
+    """Fournit une instance de `APIClient`."""
     return APIClient()
 
 
 @pytest.fixture
 def user_data():
-    """Provide valid user registration data."""
+    """Fournit des données valides d'inscription utilisateur."""
     return {
         'username': 'testuser',
         'email': 'testuser@example.com',
@@ -34,7 +34,7 @@ def user_data():
 
 @pytest.fixture
 def user_under_15_data():
-    """Provide user data with age < 15 (should fail)."""
+    """Fournit des données utilisateur avec âge < 15 (doit échouer)."""
     return {
         'username': 'younguser',
         'email': 'young@example.com',
@@ -50,7 +50,7 @@ def user_under_15_data():
 
 @pytest.fixture
 def authenticated_user(user_data):
-    """Create and return authenticated user."""
+    """Crée et retourne un utilisateur authentifié."""
     user = User.objects.create_user(
         username=user_data['username'],
         email=user_data['email'],
@@ -64,7 +64,7 @@ def authenticated_user(user_data):
 
 @pytest.fixture
 def authenticated_client(api_client, authenticated_user):
-    """Provide APIClient with authentication."""
+    """Fournit un `APIClient` authentifié."""
     refresh = RefreshToken.for_user(authenticated_user)
     api_client.credentials(
         HTTP_AUTHORIZATION=f'Bearer {str(refresh.access_token)}'
@@ -74,7 +74,7 @@ def authenticated_client(api_client, authenticated_user):
 
 @pytest.fixture
 def another_user():
-    """Create another authenticated user."""
+    """Crée un second utilisateur authentifié."""
     return User.objects.create_user(
         username='anotheruser',
         email='another@example.com',
@@ -87,7 +87,7 @@ def another_user():
 
 @pytest.fixture
 def another_authenticated_client(api_client, another_user):
-    """Provide APIClient with authentication for another user."""
+    """Fournit un `APIClient` authentifié pour un autre utilisateur."""
     refresh = RefreshToken.for_user(another_user)
     api_client.credentials(
         HTTP_AUTHORIZATION=f'Bearer {str(refresh.access_token)}'

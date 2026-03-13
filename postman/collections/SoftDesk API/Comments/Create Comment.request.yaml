@@ -1,0 +1,37 @@
+$kind: http-request
+name: Create Comment
+method: POST
+url: '{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/comments/'
+order: 2000
+headers:
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: project_id
+    value: '{{project_id}}'
+  - key: issue_id
+    value: '{{issue_id}}'
+body:
+  type: json
+  content: |-
+    {
+      "description": "I can fix this by adjusting the CSS media queries"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200 or 201', function () {
+        pm.expect(pm.response.code).to.be.oneOf([200, 201]);
+      });
+
+      const data = pm.response.json();
+      const commentUuid = data.uuid || data.id;
+
+      pm.test('Comment uuid/id present', function () {
+        pm.expect(commentUuid, 'uuid/id').to.exist;
+      });
+
+      pm.environment.set('comment_uuid', String(commentUuid));

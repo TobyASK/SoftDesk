@@ -20,7 +20,7 @@ User = get_user_model()
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
-    """Informations de base sur un utilisateur pour sérialisation imbriquée."""
+    """Informations de base sur un utilisateur en sérialisation imbriquée."""
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
@@ -31,7 +31,9 @@ class ContributorSerializer(serializers.ModelSerializer):
     """
     Sérialiseur pour Contributor.
 
-    Validation : Empêche les doublons (un utilisateur ne peut être contributeur qu'une fois).
+    Validation : Empêche les doublons.
+
+    Un utilisateur ne peut être contributeur qu'une fois.
     """
     user = UserBasicSerializer(read_only=True)
     user_id = serializers.PrimaryKeyRelatedField(
@@ -46,19 +48,23 @@ class ContributorSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_time', 'project']
 
     def validate_user_id(self, value):
-        """Ensure user exists."""
+        """Vérifie que l'utilisateur existe."""
         if not User.objects.filter(id=value.id).exists():
-            raise serializers.ValidationError("User not found.")
+            raise serializers.ValidationError("Utilisateur introuvable.")
         return value
 
     def create(self, validated_data):
         """
-        Empêcher les doublons : un utilisateur ne peut être contributeur qu'une fois.
+        Empêcher les doublons.
+
+        Un utilisateur ne peut être contributeur qu'une fois.
         """
-        contributor, created = Contributor.objects.get_or_create(**validated_data)
+        contributor, created = Contributor.objects.get_or_create(
+            **validated_data
+        )
         if not created:
             raise serializers.ValidationError(
-                "Cet utilisateur est déjÃ  contributeur de ce projet."
+                "Cet utilisateur est déjà contributeur de ce projet."
             )
         return contributor
 
@@ -106,30 +112,36 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """Serializer for Comment model."""
+    """Sérialiseur pour le modèle `Comment`."""
     author = UserBasicSerializer(read_only=True)
 
     class Meta:
         model = Comment
         fields = [
-            'uuid',
+            'id',
             'description',
             'author',
             'issue',
             'created_time',
             'updated_time'
         ]
-        read_only_fields = ['uuid', 'author', 'issue', 'created_time', 'updated_time']
+        read_only_fields = [
+            'id',
+            'author',
+            'issue',
+            'created_time',
+            'updated_time',
+        ]
 
     def validate_issue(self, value):
-        """Ensure issue exists."""
+        """Vérifie que l'issue existe."""
         if not Issue.objects.filter(id=value.id).exists():
-            raise serializers.ValidationError("Issue not found.")
+            raise serializers.ValidationError("Issue introuvable.")
         return value
 
 
 class IssueListSerializer(serializers.ModelSerializer):
-    """Serializer for Issue list view."""
+    """Sérialiseur pour la vue liste des issues."""
     author = UserBasicSerializer(read_only=True)
     assignee = UserBasicSerializer(read_only=True)
     comments_count = serializers.SerializerMethodField()
@@ -150,7 +162,7 @@ class IssueListSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'author', 'created_time']
 
     def get_comments_count(self, obj):
-        """Count of issue comments."""
+        """Retourne le nombre de commentaires d'une issue."""
         return obj.comments.count()
 
 
@@ -185,13 +197,20 @@ class IssueDetailSerializer(serializers.ModelSerializer):
             'created_time',
             'updated_time'
         ]
-        read_only_fields = ['id', 'author', 'project', 'created_time', 'updated_time']
+        read_only_fields = [
+            'id',
+            'author',
+            'project',
+            'created_time',
+            'updated_time',
+        ]
 
     def validate_assignee_id(self, value):
         """
         Validation critique : L'assigné doit être contributeur du projet.
 
-        Cette validation empêche d'assigner une issue Ã  quelqu'un qui n'a pas accès au projet.
+        Cette validation empêche d'assigner une issue à quelqu'un
+        qui n'a pas accès au projet.
         Le projet est récupéré depuis le contexte (passé par la vue).
         """
         if value is None:
@@ -204,7 +223,8 @@ class IssueDetailSerializer(serializers.ModelSerializer):
                 project = self.instance.project
             else:
                 raise serializers.ValidationError(
-                    "Les informations du projet sont nécessaires pour valider l'assigné."
+                    "Les informations du projet sont nécessaires "
+                    "pour valider l'assigné."
                 )
 
         if not Contributor.objects.filter(

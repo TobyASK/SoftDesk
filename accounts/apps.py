@@ -1,11 +1,11 @@
 """
-App configuration for accounts app.
+Configuration de l'application accounts.
 """
 
 from django.apps import AppConfig
 
 
 class AccountsConfig(AppConfig):
-    """Configuration for accounts app."""
+    """Configuration de l'application accounts."""
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'accounts'

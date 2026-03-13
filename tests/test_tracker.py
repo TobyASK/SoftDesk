@@ -1,5 +1,5 @@
 """
-Tests for tracker app - Project, Issue, Comment management and permissions.
+Tests de l'application tracker : projets, issues, commentaires et permissions.
 """
 
 import pytest
@@ -12,10 +12,10 @@ User = get_user_model()
 
 @pytest.mark.django_db
 class TestProjectManagement:
-    """Test project creation and management."""
+    """Teste la création et la gestion des projets."""
 
     def test_create_project(self, authenticated_client, authenticated_user):
-        """Test creating a project."""
+        """Vérifie la création d'un projet."""
         data = {
             'name': 'Test Project',
             'description': 'A test project',
@@ -25,7 +25,7 @@ class TestProjectManagement:
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data['name'] == data['name']
 
-        # Verify creator is author and contributor
+        # Vérifie que le créateur est auteur et contributeur
         project = Project.objects.get(name=data['name'])
         assert project.author == authenticated_user
         assert Contributor.objects.filter(
@@ -40,8 +40,8 @@ class TestProjectManagement:
         authenticated_user,
         another_user
     ):
-        """Test listing only user's projects (where they are contributor)."""
-        # Create project by authenticated user
+        """Vérifie la liste des projets où l'utilisateur est contributeur."""
+        # Crée un projet pour l'utilisateur authentifié
         project1 = Project.objects.create(
             name='Project 1',
             description='Test',
@@ -54,7 +54,7 @@ class TestProjectManagement:
             role='author'
         )
 
-        # Create project by another user (authenticated_user is not contributor)
+        # Crée un projet pour un autre utilisateur (non contributeur)
         project2 = Project.objects.create(
             name='Project 2',
             description='Test',
@@ -72,8 +72,12 @@ class TestProjectManagement:
         assert len(response.data['results']) == 1
         assert response.data['results'][0]['name'] == 'Project 1'
 
-    def test_update_project_as_author(self, authenticated_client, authenticated_user):
-        """Test project update by author."""
+    def test_update_project_as_author(
+        self,
+        authenticated_client,
+        authenticated_user
+    ):
+        """Vérifie la mise à jour d'un projet par son auteur."""
         project = Project.objects.create(
             name='Original Name',
             description='Original',
@@ -105,14 +109,15 @@ class TestProjectManagement:
         authenticated_user,
         another_user
     ):
-        """Test project cannot be updated by non-author contributor."""
+        """Vérifie qu'un contributeur non-auteur ne peut pas modifier un projet.
+        """
         project = Project.objects.create(
             name='Project',
             description='Test',
             type='back-end',
             author=another_user
         )
-        # Add authenticated_user as contributor (not author)
+        # Ajoute l'utilisateur authentifié comme contributeur (non auteur)
         Contributor.objects.create(
             user=authenticated_user,
             project=project,
@@ -136,7 +141,7 @@ class TestProjectManagement:
         authenticated_client,
         another_user
     ):
-        """Test cannot access project if not a contributor."""
+        """Vérifie qu'un non-contributeur n'accède pas au projet."""
         project = Project.objects.create(
             name='Secret Project',
             description='Test',
@@ -152,8 +157,13 @@ class TestProjectManagement:
         response = authenticated_client.get(f'/api/v1/projects/{project.id}/')
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_add_contributor(self, authenticated_client, authenticated_user, another_user):
-        """Test adding a contributor to a project."""
+    def test_add_contributor(
+        self,
+        authenticated_client,
+        authenticated_user,
+        another_user
+    ):
+        """Vérifie l'ajout d'un contributeur à un projet."""
         project = Project.objects.create(
             name='Project',
             description='Test',
@@ -183,7 +193,7 @@ class TestProjectManagement:
         authenticated_user,
         another_user
     ):
-        """Test cannot add same contributor twice."""
+        """Vérifie qu'on ne peut pas ajouter deux fois le même contributeur."""
         project = Project.objects.create(
             name='Project',
             description='Test',
@@ -211,11 +221,11 @@ class TestProjectManagement:
 
 @pytest.mark.django_db
 class TestIssueManagement:
-    """Test issue creation and management."""
+    """Teste la création et la gestion des issues."""
 
     @pytest.fixture
     def project_with_contributors(self, authenticated_user, another_user):
-        """Create project with two contributors."""
+        """Crée un projet avec deux contributeurs."""
         project = Project.objects.create(
             name='Test Project',
             description='Test',
@@ -234,8 +244,12 @@ class TestIssueManagement:
         )
         return project
 
-    def test_create_issue(self, authenticated_client, project_with_contributors):
-        """Test creating an issue."""
+    def test_create_issue(
+        self,
+        authenticated_client,
+        project_with_contributors
+    ):
+        """Vérifie la création d'une issue."""
         data = {
             'title': 'Fix login bug',
             'description': 'Login not working',
@@ -256,7 +270,7 @@ class TestIssueManagement:
         authenticated_user,
         project_with_contributors
     ):
-        """Test assigning issue to a project contributor."""
+        """Vérifie l'assignation d'une issue à un contributeur du projet."""
         issue = Issue.objects.create(
             project=project_with_contributors,
             title='Test Issue',
@@ -264,7 +278,7 @@ class TestIssueManagement:
             author=authenticated_user,
         )
 
-        # Create a second user who is a contributor
+        # Récupère un second utilisateur contributeur du projet
         other_contributor = project_with_contributors.contributors.exclude(
             user=authenticated_user
         ).first().user
@@ -272,8 +286,12 @@ class TestIssueManagement:
         data = {
             'assignee_id': other_contributor.id,
         }
+        issue_url = (
+            f'/api/v1/projects/{project_with_contributors.id}/issues/'
+            f'{issue.id}/'
+        )
         response = authenticated_client.patch(
-            f'/api/v1/projects/{project_with_contributors.id}/issues/{issue.id}/',
+            issue_url,
             data
         )
         assert response.status_code == status.HTTP_200_OK
@@ -287,7 +305,9 @@ class TestIssueManagement:
         another_user,
         project_with_contributors
     ):
-        """Test cannot assign issue to non-contributor."""
+        """Vérifie qu'on ne peut pas assigner une issue
+        à un non-contributeur.
+        """
         issue = Issue.objects.create(
             project=project_with_contributors,
             title='Test Issue',
@@ -295,7 +315,7 @@ class TestIssueManagement:
             author=authenticated_user,
         )
 
-        # Create user who is not contributor
+        # Crée un utilisateur qui n'est pas contributeur
         non_contributor = User.objects.create_user(
             username='noncontributor',
             email='non@example.com',
@@ -303,8 +323,12 @@ class TestIssueManagement:
             password='pass123'
         )
         data = {'assignee_id': non_contributor.id}
+        issue_url = (
+            f'/api/v1/projects/{project_with_contributors.id}/issues/'
+            f'{issue.id}/'
+        )
         response = authenticated_client.patch(
-            f'/api/v1/projects/{project_with_contributors.id}/issues/{issue.id}/',
+            issue_url,
             data
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -316,7 +340,7 @@ class TestIssueManagement:
         authenticated_user,
         project_with_contributors
     ):
-        """Test issue update by author."""
+        """Vérifie la mise à jour d'une issue par son auteur."""
         issue = Issue.objects.create(
             project=project_with_contributors,
             title='Original Title',
@@ -325,8 +349,12 @@ class TestIssueManagement:
         )
 
         data = {'status': 'In Progress', 'priority': 'HIGH'}
+        issue_url = (
+            f'/api/v1/projects/{project_with_contributors.id}/issues/'
+            f'{issue.id}/'
+        )
         response = authenticated_client.patch(
-            f'/api/v1/projects/{project_with_contributors.id}/issues/{issue.id}/',
+            issue_url,
             data
         )
         assert response.status_code == status.HTTP_200_OK
@@ -339,7 +367,7 @@ class TestIssueManagement:
         authenticated_user,
         project_with_contributors
     ):
-        """Test issue cannot be updated by non-author."""
+        """Vérifie qu'une issue ne peut pas être modifiée par un non-auteur."""
         issue = Issue.objects.create(
             project=project_with_contributors,
             title='Test Issue',
@@ -348,8 +376,12 @@ class TestIssueManagement:
         )
 
         data = {'status': 'Finished'}
+        issue_url = (
+            f'/api/v1/projects/{project_with_contributors.id}/issues/'
+            f'{issue.id}/'
+        )
         response = another_authenticated_client.patch(
-            f'/api/v1/projects/{project_with_contributors.id}/issues/{issue.id}/',
+            issue_url,
             data
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -360,7 +392,7 @@ class TestIssueManagement:
         authenticated_user,
         project_with_contributors
     ):
-        """Test listing issues of a project (paginated)."""
+        """Vérifie la liste paginée des issues d'un projet."""
         for i in range(15):
             Issue.objects.create(
                 project=project_with_contributors,
@@ -373,17 +405,17 @@ class TestIssueManagement:
             f'/api/v1/projects/{project_with_contributors.id}/issues/'
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data['results']) == 10  # Default page size
+        assert len(response.data['results']) == 10  # Taille de page par défaut
         assert response.data['count'] == 15
 
 
 @pytest.mark.django_db
 class TestCommentManagement:
-    """Test comment creation and management."""
+    """Teste la création et la gestion des commentaires."""
 
     @pytest.fixture
     def issue_with_author(self, authenticated_user, project_with_contributors):
-        """Create issue for testing comments."""
+        """Crée une issue pour tester les commentaires."""
         return Issue.objects.create(
             project=project_with_contributors,
             title='Test Issue',
@@ -397,10 +429,14 @@ class TestCommentManagement:
         project_with_contributors,
         issue_with_author
     ):
-        """Test creating a comment on an issue."""
+        """Vérifie la création d'un commentaire sur une issue."""
         data = {'description': 'This is a comment'}
+        comments_url = (
+            f'/api/v1/projects/{project_with_contributors.id}/issues/'
+            f'{issue_with_author.id}/comments/'
+        )
         response = authenticated_client.post(
-            f'/api/v1/projects/{project_with_contributors.id}/issues/{issue_with_author.id}/comments/',
+            comments_url,
             data
         )
         assert response.status_code == status.HTTP_201_CREATED
@@ -415,7 +451,7 @@ class TestCommentManagement:
         project_with_contributors,
         issue_with_author
     ):
-        """Test comment update by author."""
+        """Vérifie la mise à jour d'un commentaire par son auteur."""
         comment = Comment.objects.create(
             issue=issue_with_author,
             description='Original comment',
@@ -423,8 +459,12 @@ class TestCommentManagement:
         )
 
         data = {'description': 'Updated comment'}
+        comment_url = (
+            f'/api/v1/projects/{project_with_contributors.id}/issues/'
+            f'{issue_with_author.id}/comments/{comment.id}/'
+        )
         response = authenticated_client.patch(
-            f'/api/v1/projects/{project_with_contributors.id}/issues/{issue_with_author.id}/comments/{comment.uuid}/',
+            comment_url,
             data
         )
         assert response.status_code == status.HTTP_200_OK
@@ -438,7 +478,9 @@ class TestCommentManagement:
         project_with_contributors,
         issue_with_author
     ):
-        """Test comment cannot be updated by non-author."""
+        """Vérifie qu'un commentaire ne peut pas être modifié
+        par un non-auteur.
+        """
         comment = Comment.objects.create(
             issue=issue_with_author,
             description='Original comment',
@@ -446,8 +488,12 @@ class TestCommentManagement:
         )
 
         data = {'description': 'Hacked comment'}
+        comment_url = (
+            f'/api/v1/projects/{project_with_contributors.id}/issues/'
+            f'{issue_with_author.id}/comments/{comment.id}/'
+        )
         response = another_authenticated_client.patch(
-            f'/api/v1/projects/{project_with_contributors.id}/issues/{issue_with_author.id}/comments/{comment.uuid}/',
+            comment_url,
             data
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -459,7 +505,7 @@ class TestCommentManagement:
         project_with_contributors,
         issue_with_author
     ):
-        """Test listing comments of an issue (paginated)."""
+        """Vérifie la liste paginée des commentaires d'une issue."""
         for i in range(15):
             Comment.objects.create(
                 issue=issue_with_author,
@@ -467,25 +513,33 @@ class TestCommentManagement:
                 author=authenticated_user,
             )
 
+        comments_url = (
+            f'/api/v1/projects/{project_with_contributors.id}/issues/'
+            f'{issue_with_author.id}/comments/'
+        )
         response = authenticated_client.get(
-            f'/api/v1/projects/{project_with_contributors.id}/issues/{issue_with_author.id}/comments/'
+            comments_url
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data['results']) == 10  # Default page size
+        assert len(response.data['results']) == 10  # Taille de page par défaut
         assert response.data['count'] == 15
 
 
 @pytest.mark.django_db
 class TestUnauthenticatedAccess:
-    """Test that unauthenticated users cannot access resources."""
+    """Vérifie que les utilisateurs non authentifiés
+    n'accèdent pas aux ressources.
+    """
 
     def test_cannot_list_projects_without_auth(self, api_client):
-        """Test cannot list projects without authentication."""
+        """Vérifie qu'on ne peut pas lister les projets
+        sans authentification.
+        """
         response = api_client.get('/api/v1/projects/')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_cannot_create_project_without_auth(self, api_client):
-        """Test cannot create project without authentication."""
+        """Vérifie qu'on ne peut pas créer de projet sans authentification."""
         data = {
             'name': 'Project',
             'description': 'Test',
@@ -497,7 +551,7 @@ class TestUnauthenticatedAccess:
 
 @pytest.fixture
 def project_with_contributors(authenticated_user, another_user):
-    """Create project with two contributors."""
+    """Crée un projet avec deux contributeurs."""
     project = Project.objects.create(
         name='Test Project',
         description='Test',
@@ -519,7 +573,7 @@ def project_with_contributors(authenticated_user, another_user):
 
 @pytest.fixture
 def issue_with_author(authenticated_user, project_with_contributors):
-    """Create issue for testing comments."""
+    """Crée une issue pour tester les commentaires."""
     return Issue.objects.create(
         project=project_with_contributors,
         title='Test Issue',

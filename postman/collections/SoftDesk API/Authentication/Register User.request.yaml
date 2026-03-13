@@ -1,0 +1,22 @@
+$kind: http-request
+name: Register User
+method: POST
+url: '{{base_url}}/auth/register/'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "john_doe",
+      "email": "john@example.com",
+      "first_name": "John",
+      "last_name": "Doe",
+      "age": 25,
+      "password": "securepass123",
+      "password_confirm": "securepass123",
+      "can_be_contacted": true,
+      "can_data_be_shared": false
+    }

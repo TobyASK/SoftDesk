@@ -1,0 +1,40 @@
+$kind: http-request
+name: Create Issue
+method: POST
+url: '{{base_url}}/projects/{{project_id}}/issues/'
+order: 2000
+headers:
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: project_id
+    value: '{{project_id}}'
+body:
+  type: json
+  content: |-
+    {
+      "title": "Fix responsive design",
+      "description": "The layout breaks on small screens",
+      "priority": "HIGH",
+      "tag": "BUG",
+      "status": "To Do",
+      "assignee_id": 2
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200 or 201', function () {
+        pm.expect(pm.response.code).to.be.oneOf([200, 201]);
+      });
+
+      const data = pm.response.json();
+      const issueId = data.id;
+
+      pm.test('Issue id present', function () {
+        pm.expect(issueId, 'id').to.exist;
+      });
+
+      pm.environment.set('issue_id', String(issueId));

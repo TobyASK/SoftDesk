@@ -1,0 +1,21 @@
+$kind: http-request
+name: Remove Contributor
+method: DELETE
+url: '{{base_url}}/projects/{{project_id}}/contributor/?user_id=2'
+order: 7000
+headers:
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+pathVariables:
+  - key: project_id
+    value: '{{project_id}}'
+queryParams:
+  - key: user_id
+    value: '2'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200 or 204', function () {
+        pm.expect(pm.response.code).to.be.oneOf([200, 204]);
+      });

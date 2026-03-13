@@ -1,0 +1,22 @@
+$kind: http-request
+name: Update Issue
+method: PATCH
+url: '{{base_url}}/projects/{{project_id}}/issues/{{issue_id}}/'
+order: 4000
+headers:
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: project_id
+    value: '{{project_id}}'
+  - key: issue_id
+    value: '{{issue_id}}'
+body:
+  type: json
+  content: |-
+    {
+      "status": "In Progress",
+      "priority": "MEDIUM"
+    }

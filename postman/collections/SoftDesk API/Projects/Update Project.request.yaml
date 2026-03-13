@@ -1,0 +1,21 @@
+$kind: http-request
+name: Update Project
+method: PUT
+url: '{{base_url}}/projects/{{project_id}}/'
+order: 4000
+headers:
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: project_id
+    value: '{{project_id}}'
+body:
+  type: json
+  content: |-
+    {
+      "name": "Updated Project Name",
+      "description": "Updated description",
+      "type": "back-end"
+    }

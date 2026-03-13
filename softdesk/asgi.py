@@ -1,5 +1,5 @@
 """
-ASGI config for softdesk project.
+Configuration ASGI pour le projet softdesk.
 """
 
 import os
