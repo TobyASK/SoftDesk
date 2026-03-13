@@ -12,7 +12,7 @@ Une API simple et professionnelle pour gérer des projets, des problèmes et des
 ✅ **Permissions granulaires** - Seuls les contributeurs et auteurs ont accès  
 ✅ **Pagination** - Listes paginées (10 éléments par page)  
 ✅ **Optimisations ORM** - `select_related` et `prefetch_related`  
-✅ **Tests complets** - 36+ tests couvrant tous les cas  
+✅ **Tests complets** - 34 tests couvrant tous les cas  
 ✅ **Conformité RGPD** - Validation d'âge et champs de consentement  
 
 ## Pré-requis
@@ -82,7 +82,7 @@ Panneau admin : `http://localhost:8000/admin/`
 | `POST` | `/auth/register/` | Créer un compte utilisateur |
 | `POST` | `/auth/token/` | Obtenir access et refresh tokens |
 | `POST` | `/auth/token/refresh/` | Rafraîchir le token d'accès |
-| `GET` | `/auth/users/profile/me/` | Profil utilisateur actuel |
+| `GET` | `/auth/users/profile/` | Profil utilisateur actuel |
 | `PUT` | `/auth/users/{id}/` | Modifier le profil utilisateur |
 
 ### Projets
@@ -111,8 +111,8 @@ Panneau admin : `http://localhost:8000/admin/`
 |---------|----------|-------------|
 | `GET` | `/projects/{project_id}/issues/{issue_id}/comments/` | Lister les commentaires |
 | `POST` | `/projects/{project_id}/issues/{issue_id}/comments/` | Ajouter un commentaire |
-| `PUT` | `/projects/{project_id}/issues/{issue_id}/comments/{uuid}/` | Modifier (auteur uniquement) |
-| `DELETE` | `/projects/{project_id}/issues/{issue_id}/comments/{uuid}/` | Supprimer (auteur uniquement) |
+| `PUT` | `/projects/{project_id}/issues/{issue_id}/comments/{id}/` | Modifier (auteur uniquement) |
+| `DELETE` | `/projects/{project_id}/issues/{issue_id}/comments/{id}/` | Supprimer (auteur uniquement) |
 
 ## Exemples d'utilisation
 
@@ -194,7 +194,7 @@ curl -X POST http://localhost:8000/api/v1/projects/ \
 **Réponse** : `201 Created`
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "id": 1,
   "name": "Mon Application",
   "description": "Une application web responsive",
   "type": "front-end",
@@ -211,7 +211,7 @@ curl -X POST http://localhost:8000/api/v1/projects/ \
 ### 4. Ajouter un contributeur au projet
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/projects/550e8400-e29b-41d4-a716-446655440000/contributor/ \
+curl -X POST http://localhost:8000/api/v1/projects/1/contributor/ \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -224,7 +224,7 @@ curl -X POST http://localhost:8000/api/v1/projects/550e8400-e29b-41d4-a716-44665
 ### 5. Créer un problème
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/projects/550e8400-e29b-41d4-a716-446655440000/issues/ \
+curl -X POST http://localhost:8000/api/v1/projects/1/issues/ \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -249,7 +249,7 @@ curl -X POST http://localhost:8000/api/v1/projects/550e8400-e29b-41d4-a716-44665
 ### 6. Ajouter un commentaire
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/projects/550e8400-e29b-41d4-a716-446655440000/issues/550e8400-e29b-41d4-a716-446655440003/comments/ \
+curl -X POST http://localhost:8000/api/v1/projects/1/issues/1/comments/ \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -353,7 +353,7 @@ softdesk/
 │   ├── permissions.py    # Contrôle d'accès
 │   ├── pagination.py     # Pagination (10 items/page)
 │   └── urls.py
-├── tests/                # Suite de tests (36+ tests)
+├── tests/                # Suite de tests (34 tests)
 │   ├── conftest.py
 │   ├── test_accounts.py
 │   └── test_tracker.py
